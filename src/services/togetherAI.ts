@@ -19,7 +19,7 @@ export async function generateAIResponse(userMessage: string) {
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: "meta-llama/Llama-2-70b-chat-hf",
+      model: "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo",
       messages: [
         {
           role: "system",
