@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
+import { generateAIResponse } from "@/services/togetherAI";
+import { ChatMessage } from "@/components/ChatMessage";
 
 interface Message {
   id: string;
@@ -22,6 +24,7 @@ export default function Chat() {
     },
   ]);
   const [inputMessage, setInputMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -39,18 +42,30 @@ export default function Chat() {
 
     setMessages((prev) => [...prev, userMessage]);
     setInputMessage("");
+    setIsLoading(true);
 
-    // Simulate AI response (replace with actual API call later)
-    const aiResponse: Message = {
-      id: (Date.now() + 1).toString(),
-      content: "I understand how you're feeling. Would you like to tell me more about that?",
-      sender: "ai",
-      timestamp: new Date(),
-    };
+    try {
+      // Generate AI response using Together AI
+      const aiResponseContent = await generateAIResponse(inputMessage);
+      
+      const aiResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        content: aiResponseContent,
+        sender: "ai",
+        timestamp: new Date(),
+      };
 
-    setTimeout(() => {
       setMessages((prev) => [...prev, aiResponse]);
-    }, 1000);
+    } catch (error) {
+      console.error("Error generating AI response:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate AI response. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -59,25 +74,12 @@ export default function Chat() {
         <ScrollArea className="h-[calc(100vh-180px)] pr-4">
           <div className="space-y-4">
             {messages.map((message) => (
-              <div
+              <ChatMessage
                 key={message.id}
-                className={`flex ${
-                  message.sender === "user" ? "justify-end" : "justify-start"
-                }`}
-              >
-                <div
-                  className={`max-w-[80%] rounded-lg p-4 ${
-                    message.sender === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted"
-                  }`}
-                >
-                  <p className="text-sm">{message.content}</p>
-                  <span className="text-xs opacity-70 mt-1 block">
-                    {message.timestamp.toLocaleTimeString()}
-                  </span>
-                </div>
-              </div>
+                content={message.content}
+                sender={message.sender}
+                timestamp={message.timestamp}
+              />
             ))}
           </div>
         </ScrollArea>
@@ -89,8 +91,9 @@ export default function Chat() {
           onChange={(e) => setInputMessage(e.target.value)}
           placeholder="Type your message..."
           className="flex-1"
+          disabled={isLoading}
         />
-        <Button type="submit" size="icon">
+        <Button type="submit" size="icon" disabled={isLoading}>
           <Send className="h-4 w-4" />
         </Button>
       </form>
