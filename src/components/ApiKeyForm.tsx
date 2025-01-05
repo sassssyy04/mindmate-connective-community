@@ -1,53 +1,46 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 
 interface ApiKeyFormProps {
-  onApiKeySubmit: (apiKey: string) => void;
+  onApiKeySubmit: (key: string) => void;
 }
 
 export function ApiKeyForm({ onApiKeySubmit }: ApiKeyFormProps) {
-  const [apiKey, setApiKey] = useState("");
-  const { toast } = useToast();
+  const [key, setKey] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!apiKey.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter your Together AI API key",
-        variant: "destructive",
-      });
-      return;
+    if (key.trim()) {
+      console.log("Submitting API key from form");
+      onApiKeySubmit(key.trim());
     }
-
-    onApiKeySubmit(apiKey);
-    toast({
-      title: "Success",
-      description: "API key has been saved",
-    });
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] max-w-md mx-auto px-4">
-      <h2 className="text-2xl font-semibold mb-6">Enter Your Together AI API Key</h2>
-      <p className="text-muted-foreground mb-8 text-center">
-        To use the chat feature, please enter your Together AI API key. You can get one from the Together AI platform.
-      </p>
-      <form onSubmit={handleSubmit} className="w-full space-y-4">
-        <Input
-          type="password"
-          value={apiKey}
-          onChange={(e) => setApiKey(e.target.value)}
-          placeholder="Enter your API key"
-          className="w-full"
-        />
-        <Button type="submit" className="w-full">
-          Save API Key
-        </Button>
-      </form>
+    <div className="flex items-center justify-center min-h-screen p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle>Enter Your Together AI API Key</CardTitle>
+          <CardDescription>
+            You need a Together AI API key to use the chat feature. You can get one from the Together AI website.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <Input
+              type="password"
+              placeholder="Enter your API key"
+              value={key}
+              onChange={(e) => setKey(e.target.value)}
+            />
+            <Button type="submit" className="w-full">
+              Submit
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

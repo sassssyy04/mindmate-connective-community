@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
-import { generateAIResponse } from "@/services/togetherAI";
+import { generateAIResponse, setApiKey } from "@/services/togetherAI";
 import { ChatMessage } from "@/components/ChatMessage";
 import { ApiKeyForm } from "@/components/ApiKeyForm";
 
@@ -26,11 +26,13 @@ export default function Chat() {
   ]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [apiKey, setApiKey] = useState<string | null>(null);
+  const [apiKey, setApiKeyState] = useState<string | null>(null);
   const { toast } = useToast();
 
   const handleApiKeySubmit = (key: string) => {
-    setApiKey(key);
+    console.log("API key submitted in Chat component");
+    setApiKey(key); // Set in the service
+    setApiKeyState(key); // Set in component state
   };
 
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -51,7 +53,7 @@ export default function Chat() {
     setIsLoading(true);
 
     try {
-      // Generate AI response using Together AI
+      console.log("Attempting to generate AI response");
       const aiResponseContent = await generateAIResponse(inputMessage);
       
       const aiResponse: Message = {

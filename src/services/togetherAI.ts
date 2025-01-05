@@ -1,14 +1,17 @@
 let apiKey: string | null = null;
 
 export function setApiKey(key: string) {
+  console.log("Setting API key in togetherAI service");
   apiKey = key;
 }
 
 export async function generateAIResponse(userMessage: string) {
   if (!apiKey) {
+    console.error("API key not set in togetherAI service");
     throw new Error("API key not set");
   }
 
+  console.log("Generating AI response with Together AI");
   const response = await fetch("https://api.together.xyz/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -33,6 +36,7 @@ export async function generateAIResponse(userMessage: string) {
   });
 
   if (!response.ok) {
+    console.error("Together AI API error:", response.status, response.statusText);
     throw new Error("Failed to generate AI response");
   }
 
