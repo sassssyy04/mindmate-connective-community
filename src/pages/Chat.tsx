@@ -6,6 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { generateAIResponse } from "@/services/togetherAI";
 import { ChatMessage } from "@/components/ChatMessage";
+import { ApiKeyForm } from "@/components/ApiKeyForm";
 
 interface Message {
   id: string;
@@ -25,7 +26,12 @@ export default function Chat() {
   ]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [apiKey, setApiKey] = useState<string | null>(null);
   const { toast } = useToast();
+
+  const handleApiKeySubmit = (key: string) => {
+    setApiKey(key);
+  };
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,6 +73,10 @@ export default function Chat() {
       setIsLoading(false);
     }
   };
+
+  if (!apiKey) {
+    return <ApiKeyForm onApiKeySubmit={handleApiKeySubmit} />;
+  }
 
   return (
     <div className="flex flex-col h-screen max-w-3xl mx-auto px-4 pt-20 pb-4">

@@ -1,11 +1,19 @@
-const TOGETHER_API_URL = "https://api.together.xyz/v1/chat/completions";
+let apiKey: string | null = null;
+
+export function setApiKey(key: string) {
+  apiKey = key;
+}
 
 export async function generateAIResponse(userMessage: string) {
-  const response = await fetch(TOGETHER_API_URL, {
+  if (!apiKey) {
+    throw new Error("API key not set");
+  }
+
+  const response = await fetch("https://api.together.xyz/v1/chat/completions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${import.meta.env.VITE_TOGETHER_API_KEY}`,
+      Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
       model: "togethercomputer/llama-2-70b-chat",
