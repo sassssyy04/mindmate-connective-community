@@ -19,7 +19,7 @@ export async function generateAIResponse(userMessage: string) {
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: "togethercomputer/llama-2-70b-chat",
+      model: "mistralai/Mixtral-8x7B-Instruct-v0.1",
       messages: [
         {
           role: "system",
