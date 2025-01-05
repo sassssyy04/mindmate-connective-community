@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,11 +28,25 @@ export default function Chat() {
   const [isLoading, setIsLoading] = useState(false);
   const [apiKey, setApiKeyState] = useState<string | null>(null);
   const { toast } = useToast();
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    if (scrollAreaRef.current) {
+      const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+      }
+    }
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]); // Scroll whenever messages change
 
   const handleApiKeySubmit = (key: string) => {
     console.log("API key submitted in Chat component");
-    setApiKey(key); // Set in the service
-    setApiKeyState(key); // Set in component state
+    setApiKey(key);
+    setApiKeyState(key);
   };
 
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -40,7 +54,6 @@ export default function Chat() {
     
     if (!inputMessage.trim()) return;
 
-    // Add user message
     const userMessage: Message = {
       id: Date.now().toString(),
       content: inputMessage,
@@ -83,7 +96,7 @@ export default function Chat() {
   return (
     <div className="flex flex-col h-screen max-w-3xl mx-auto px-4 pt-20 pb-4">
       <div className="flex-1 space-y-4 mb-4">
-        <ScrollArea className="h-[calc(100vh-180px)] pr-4">
+        <ScrollArea ref={scrollAreaRef} className="h-[calc(100vh-180px)] pr-4">
           <div className="space-y-4">
             {messages.map((message) => (
               <ChatMessage
