@@ -19,9 +19,13 @@ const Navigation = () => {
           <div className="flex items-center">
             <Link
               to="/"
-              className="text-xl font-semibold text-sage-500 hover:text-sage-600 transition-colors"
+              className="flex items-center"
             >
-              HyTribe
+              <img 
+                src="/lovable-uploads/c7e0dc4a-5759-4b76-9276-bce3c18ee062.png" 
+                alt="Hytribe Logo" 
+                className="h-8"
+              />
             </Link>
           </div>
 

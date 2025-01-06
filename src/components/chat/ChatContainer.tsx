@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +25,15 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
   const [messages, setMessages] = useState<Message[]>([]);
   const [roomMembers, setRoomMembers] = useState<any[]>([]);
   const { toast } = useToast();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   useEffect(() => {
     if (!currentRoom?.id) return;
@@ -42,17 +51,9 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
           table: 'messages',
           filter: `room_id=eq.${currentRoom.id}`
         },
-        (payload) => {
+        (payload: { new: Message }) => {
           console.log('New message received:', payload.new);
-          setMessages((currentMessages) => {
-            // Check if message already exists to prevent duplicates
-            if (currentMessages.find((msg) => msg.id === payload.new.id)) {
-              console.log('Message already exists, skipping');
-              return currentMessages;
-            }
-            console.log('Adding new message to state');
-            return [...currentMessages, payload.new as Message];
-          });
+          setMessages(currentMessages => [...currentMessages, payload.new]);
         }
       )
       .subscribe((status) => {
@@ -61,7 +62,7 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
 
     return () => {
       console.log('Cleaning up subscription for room:', currentRoom.id);
-      channel.unsubscribe();
+      supabase.removeChannel(channel);
     };
   }, [currentRoom?.id]);
 
@@ -132,7 +133,6 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
     }
   };
 
-  // Show recommendation if user is alone in the room
   const isUserAlone = roomMembers.length <= 1;
 
   return (
@@ -150,6 +150,7 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
             timestamp={new Date(msg.created_at)}
           />
         ))}
+        <div ref={messagesEndRef} />
       </div>
 
       <form onSubmit={sendMessage} className="flex gap-2">
