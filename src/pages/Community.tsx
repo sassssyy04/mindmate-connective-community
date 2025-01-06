@@ -5,15 +5,9 @@ import { AuthForm } from "@/components/AuthForm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Send, Plus } from "lucide-react";
+import { Send } from "lucide-react";
 import { ChatMessage } from "@/components/ChatMessage";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { RoomList } from "@/components/RoomList";
 
 const Community = () => {
   const { user, supabase } = useAuth();
@@ -21,7 +15,6 @@ const Community = () => {
   const [messages, setMessages] = useState<any[]>([]);
   const [rooms, setRooms] = useState<any[]>([]);
   const [currentRoom, setCurrentRoom] = useState<any>(null);
-  const [newRoomName, setNewRoomName] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -120,27 +113,20 @@ const Community = () => {
     }
   };
 
-  const createRoom = async () => {
-    if (!newRoomName.trim()) return;
-
+  const createRoom = async (name: string) => {
     try {
-      console.log('Creating new room:', newRoomName);
+      console.log('Creating new room:', name);
       const { data: room, error: roomError } = await supabase
         .from('rooms')
-        .insert([{ name: newRoomName, created_by: user?.id }])
+        .insert([{ name, created_by: user?.id }])
         .select()
         .single();
 
       if (roomError) throw roomError;
 
       // Join the room after creating it
-      const { error: joinError } = await supabase
-        .from('room_members')
-        .insert([{ room_id: room.id, user_id: user?.id }]);
+      await joinRoom(room);
 
-      if (joinError) throw joinError;
-
-      setNewRoomName("");
       toast({
         title: "Success",
         description: "Room created successfully",
@@ -158,6 +144,26 @@ const Community = () => {
   const joinRoom = async (room: any) => {
     try {
       console.log('Joining room:', room.id);
+      
+      // First check if user is already a member
+      const { data: existingMember } = await supabase
+        .from('room_members')
+        .select('id')
+        .eq('room_id', room.id)
+        .eq('user_id', user?.id)
+        .single();
+
+      if (existingMember) {
+        console.log('User is already a member of this room');
+        setCurrentRoom(room);
+        toast({
+          title: "Info",
+          description: `Switched to room: ${room.name}`,
+        });
+        return;
+      }
+
+      // If not a member, join the room
       const { error } = await supabase
         .from('room_members')
         .insert([{ room_id: room.id, user_id: user?.id }]);
@@ -248,51 +254,15 @@ const Community = () => {
           <p className="text-xl text-gray-600 mb-4">
             Join a room or create a new one
           </p>
-
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button className="mb-4">
-                <Plus className="h-4 w-4 mr-2" />
-                Create New Room
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create a New Room</DialogTitle>
-              </DialogHeader>
-              <div className="flex gap-2">
-                <Input
-                  value={newRoomName}
-                  onChange={(e) => setNewRoomName(e.target.value)}
-                  placeholder="Enter room name..."
-                />
-                <Button onClick={createRoom}>Create</Button>
-              </div>
-            </DialogContent>
-          </Dialog>
         </motion.div>
 
         <div className="grid md:grid-cols-[300px,1fr] gap-6">
-          {/* Rooms List */}
-          <div className="bg-white rounded-lg shadow-lg p-4">
-            <h2 className="font-semibold mb-4">Available Rooms</h2>
-            <div className="space-y-2">
-              {rooms.map((room) => (
-                <div
-                  key={room.id}
-                  className="p-3 rounded-lg border cursor-pointer hover:bg-gray-50 transition-colors"
-                  onClick={() => joinRoom(room)}
-                >
-                  <h3 className="font-medium">{room.name}</h3>
-                  <p className="text-sm text-gray-500">
-                    Expires: {new Date(room.expires_at).toLocaleString()}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
+          <RoomList 
+            rooms={rooms}
+            onJoinRoom={joinRoom}
+            onCreateRoom={createRoom}
+          />
 
-          {/* Chat Area */}
           {currentRoom ? (
             <div className="bg-white rounded-lg shadow-lg p-6">
               <h2 className="font-semibold mb-4">{currentRoom.name}</h2>
