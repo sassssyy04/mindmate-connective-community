@@ -1,19 +1,12 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
 import { ChatMessage } from "@/components/ChatMessage";
-import { supabase } from "@/integrations/supabase/client";
 import { EmptyRoomMessage } from "./EmptyRoomMessage";
-
-interface Message {
-  id: string;
-  content: string;
-  user_id: string;
-  created_at: string;
-  room_id: string;
-}
+import { useMessages } from "@/hooks/useMessages";
+import { useDisplayNames } from "@/hooks/useDisplayNames";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ChatContainerProps {
   currentRoom: any;
@@ -22,26 +15,23 @@ interface ChatContainerProps {
 
 export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps) => {
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
   const [roomMembers, setRoomMembers] = useState<any[]>([]);
-  const [userDisplayNames, setUserDisplayNames] = useState<Record<string, string>>({});
-  const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const channelRef = useRef<any>(null);
+  
+  const { messages, sendMessage } = useMessages(currentRoom?.id);
+  const userIds = [...new Set(messages.map(msg => msg.user_id))];
+  const displayNames = useDisplayNames(userIds);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  useEffect(() => {
+  // Set up real-time subscription
+  useState(() => {
     if (!currentRoom?.id) return;
 
     console.log('Setting up message subscription for room:', currentRoom.id);
-    fetchMessages(currentRoom.id);
     fetchRoomMembers(currentRoom.id);
 
     if (channelRef.current) {
@@ -59,13 +49,7 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
           table: 'messages',
           filter: `room_id=eq.${currentRoom.id}`
         },
-        async (payload: { new: Message }) => {
-          console.log('New message received:', payload.new);
-          // Fetch display name for new message if not already cached
-          if (!userDisplayNames[payload.new.user_id]) {
-            await fetchDisplayName(payload.new.user_id);
-          }
-          setMessages(prevMessages => [...prevMessages, payload.new]);
+        () => {
           scrollToBottom();
         }
       )
@@ -81,61 +65,6 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
     };
   }, [currentRoom?.id]);
 
-  const fetchDisplayName = async (userId: string) => {
-    try {
-      console.log('Fetching display name for user:', userId);
-      const { data, error } = await supabase
-        .from('member_onboarding')
-        .select('display_name')
-        .eq('user_id', userId)
-        .single();
-
-      if (error) throw error;
-      
-      if (data) {
-        console.log('Display name fetched:', data.display_name, 'for user:', userId);
-        setUserDisplayNames(prev => ({
-          ...prev,
-          [userId]: data.display_name
-        }));
-      }
-    } catch (error) {
-      console.error('Error fetching display name:', error);
-    }
-  };
-
-  const fetchMessages = async (roomId: string) => {
-    try {
-      console.log('Fetching messages for room:', roomId);
-      const { data, error } = await supabase
-        .from('messages')
-        .select('*')
-        .eq('room_id', roomId)
-        .order('created_at', { ascending: true });
-
-      if (error) throw error;
-      console.log('Messages fetched:', data);
-      setMessages(data || []);
-
-      // Fetch display names for all unique users
-      const uniqueUserIds = [...new Set(data?.map(msg => msg.user_id) || [])];
-      uniqueUserIds.forEach(userId => {
-        if (!userDisplayNames[userId]) {
-          fetchDisplayName(userId);
-        }
-      });
-
-      scrollToBottom();
-    } catch (error) {
-      console.error('Error fetching messages:', error);
-      toast({
-        title: "Error",
-        description: (error as Error).message,
-        variant: "destructive",
-      });
-    }
-  };
-
   const fetchRoomMembers = async (roomId: string) => {
     try {
       const { data, error } = await supabase
@@ -150,32 +79,13 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
     }
   };
 
-  const sendMessage = async (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim() || !currentRoom) return;
 
-    try {
-      console.log('Sending message to room:', currentRoom.id);
-      const { error } = await supabase
-        .from("messages")
-        .insert([{ 
-          content: message.trim(), 
-          user_id: currentUserId,
-          room_id: currentRoom.id 
-        }]);
-
-      if (error) throw error;
-
-      setMessage("");
-      scrollToBottom();
-    } catch (error) {
-      console.error('Error sending message:', error);
-      toast({
-        title: "Error",
-        description: (error as Error).message,
-        variant: "destructive",
-      });
-    }
+    await sendMessage(message, currentUserId);
+    setMessage("");
+    scrollToBottom();
   };
 
   const isUserAlone = roomMembers.length <= 1;
@@ -193,13 +103,13 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
             content={msg.content}
             sender={msg.user_id === currentUserId ? "user" : "ai"}
             timestamp={new Date(msg.created_at)}
-            displayName={userDisplayNames[msg.user_id]}
+            displayName={displayNames[msg.user_id]}
           />
         ))}
         <div ref={messagesEndRef} />
       </div>
 
-      <form onSubmit={sendMessage} className="flex gap-2">
+      <form onSubmit={handleSendMessage} className="flex gap-2">
         <Input
           value={message}
           onChange={(e) => setMessage(e.target.value)}
