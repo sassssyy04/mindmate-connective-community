@@ -4,8 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ChatMessage } from "@/components/ChatMessage";
 import { EmptyRoomMessage } from "./EmptyRoomMessage";
-import { useMessages } from "@/hooks/useMessages";
-import { useDisplayNames } from "@/hooks/useDisplayNames";
 import { supabase } from "@/integrations/supabase/client";
 
 interface ChatContainerProps {
@@ -15,16 +13,31 @@ interface ChatContainerProps {
 
 export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps) => {
   const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState<any[]>([]);
   const [roomMembers, setRoomMembers] = useState<any[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const channelRef = useRef<any>(null);
-  
-  const { messages, sendMessage, fetchMessages } = useMessages(currentRoom?.id);
-  const userIds = [...new Set(messages.map(msg => msg.user_id))];
-  const displayNames = useDisplayNames(userIds);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // Fetch messages
+  const fetchMessages = async () => {
+    try {
+      console.log('Fetching messages for room:', currentRoom.id);
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('room_id', currentRoom.id)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      console.log('Messages fetched:', data);
+      setMessages(data || []);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    }
   };
 
   // Set up real-time subscription
@@ -33,6 +46,7 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
 
     console.log('Setting up message subscription for room:', currentRoom.id);
     fetchRoomMembers(currentRoom.id);
+    fetchMessages();
 
     if (channelRef.current) {
       console.log('Cleaning up previous subscription');
@@ -49,8 +63,8 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
           table: 'messages',
           filter: `room_id=eq.${currentRoom.id}`
         },
-        (payload) => {
-          console.log('New message received:', payload);
+        () => {
+          console.log('New message received, fetching messages');
           fetchMessages();
           scrollToBottom();
         }
@@ -65,7 +79,7 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
         supabase.removeChannel(channelRef.current);
       }
     };
-  }, [currentRoom?.id, fetchMessages]);
+  }, [currentRoom?.id]);
 
   const fetchRoomMembers = async (roomId: string) => {
     try {
@@ -81,11 +95,28 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
     }
   };
 
+  const sendMessage = async (content: string) => {
+    try {
+      console.log('Sending message to room:', currentRoom.id);
+      const { error } = await supabase
+        .from("messages")
+        .insert([{ 
+          content: content.trim(), 
+          user_id: currentUserId,
+          room_id: currentRoom.id 
+        }]);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  };
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim() || !currentRoom) return;
 
-    await sendMessage(message, currentUserId);
+    await sendMessage(message);
     setMessage("");
     scrollToBottom();
   };
@@ -105,7 +136,6 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
             content={msg.content}
             sender={msg.user_id === currentUserId ? "user" : "ai"}
             timestamp={new Date(msg.created_at)}
-            displayName={displayNames[msg.user_id]}
           />
         ))}
         <div ref={messagesEndRef} />
