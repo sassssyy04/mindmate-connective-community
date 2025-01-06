@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthForm } from "@/components/AuthForm";
@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { Send } from "lucide-react";
+import { ChatMessage } from "@/components/ChatMessage";
 
 const Community = () => {
   const { user, supabase } = useAuth();
@@ -13,14 +14,67 @@ const Community = () => {
   const [messages, setMessages] = useState<any[]>([]);
   const { toast } = useToast();
 
+  useEffect(() => {
+    if (user) {
+      // Fetch initial messages
+      fetchMessages();
+
+      // Subscribe to new messages
+      const channel = supabase
+        .channel('messages')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'messages'
+          },
+          (payload) => {
+            console.log('New message received:', payload);
+            setMessages(prev => [...prev, payload.new]);
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [user, supabase]);
+
+  const fetchMessages = async () => {
+    try {
+      console.log('Fetching messages...');
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching messages:', error);
+        throw error;
+      }
+
+      console.log('Messages fetched:', data);
+      setMessages(data || []);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: (error as Error).message,
+        variant: "destructive",
+      });
+    }
+  };
+
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
 
     try {
+      console.log('Sending message:', message);
       const { error } = await supabase
         .from("messages")
-        .insert([{ content: message, user_id: user?.id || "anonymous" }]);
+        .insert([{ content: message, user_id: user?.id }]);
 
       if (error) throw error;
 
@@ -30,6 +84,7 @@ const Community = () => {
         description: "Your message has been sent successfully",
       });
     } catch (error) {
+      console.error('Error sending message:', error);
       toast({
         title: "Error",
         description: (error as Error).message,
@@ -80,17 +135,13 @@ const Community = () => {
 
         <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-6">
           <div className="h-96 overflow-y-auto mb-4 space-y-4">
-            {messages.map((msg, index) => (
-              <div
-                key={index}
-                className={`p-3 rounded-lg ${
-                  msg.user_id === user.id
-                    ? "bg-sage-300 ml-auto"
-                    : "bg-gray-100"
-                } max-w-[80%]`}
-              >
-                <p className="text-sm">{msg.content}</p>
-              </div>
+            {messages.map((msg) => (
+              <ChatMessage
+                key={msg.id}
+                content={msg.content}
+                sender={msg.user_id === user.id ? "user" : "ai"}
+                timestamp={new Date(msg.created_at)}
+              />
             ))}
           </div>
 
