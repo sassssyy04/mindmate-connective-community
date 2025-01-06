@@ -21,7 +21,7 @@ const Navigation = () => {
               to="/"
               className="text-xl font-semibold text-sage-500 hover:text-sage-600 transition-colors"
             >
-              MindfulAI
+              HyTribe
             </Link>
           </div>
 
