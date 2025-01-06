@@ -22,6 +22,11 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  // Scroll when messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   // Fetch messages
   const fetchMessages = async () => {
     try {
@@ -66,7 +71,6 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
         () => {
           console.log('New message received, fetching messages');
           fetchMessages();
-          scrollToBottom();
         }
       )
       .subscribe((status) => {
@@ -118,7 +122,6 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
 
     await sendMessage(message);
     setMessage("");
-    scrollToBottom();
   };
 
   const isUserAlone = roomMembers.length <= 1;
