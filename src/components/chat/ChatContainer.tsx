@@ -53,7 +53,16 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
         },
         (payload: { new: Message }) => {
           console.log('New message received:', payload.new);
-          setMessages(currentMessages => [...currentMessages, payload.new]);
+          setMessages(prevMessages => {
+            // Check if message already exists
+            const messageExists = prevMessages.some(msg => msg.id === payload.new.id);
+            if (messageExists) {
+              console.log('Message already exists, skipping update');
+              return prevMessages;
+            }
+            console.log('Adding new message to state');
+            return [...prevMessages, payload.new];
+          });
         }
       )
       .subscribe((status) => {
@@ -61,7 +70,7 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
       });
 
     return () => {
-      console.log('Cleaning up subscription for room:', currentRoom.id);
+      console.log('Cleaning up subscription');
       supabase.removeChannel(channel);
     };
   }, [currentRoom?.id]);
