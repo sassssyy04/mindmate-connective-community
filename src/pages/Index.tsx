@@ -15,7 +15,7 @@ const Index = () => {
           className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center"
         >
           <span className="inline-block px-4 py-1.5 mb-4 text-sm font-medium text-sage-500 bg-sage-50 rounded-full">
-            Your Journey to Better Mental Health
+            We all Belong
           </span>
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
             Compassionate AI-Powered
