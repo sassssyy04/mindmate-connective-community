@@ -57,14 +57,16 @@ const Community = () => {
             table: 'messages',
             filter: `room_id=eq.${currentRoom.id}`
           },
-          (payload) => {
+          (payload: any) => {
             console.log('New message received:', payload);
-            setMessages(prev => [...prev, payload.new]);
+            // Update messages state with the new message
+            setMessages(prevMessages => [...prevMessages, payload.new]);
           }
         )
         .subscribe();
 
       return () => {
+        console.log('Cleaning up message subscription');
         supabase.removeChannel(messageChannel);
       };
     }
