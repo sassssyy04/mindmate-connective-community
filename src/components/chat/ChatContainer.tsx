@@ -44,13 +44,11 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
     fetchMessages(currentRoom.id);
     fetchRoomMembers(currentRoom.id);
 
-    // Clean up previous subscription if it exists
     if (channelRef.current) {
       console.log('Cleaning up previous subscription');
       supabase.removeChannel(channelRef.current);
     }
 
-    // Create new subscription
     channelRef.current = supabase
       .channel(`room:${currentRoom.id}`)
       .on(
@@ -61,8 +59,12 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
           table: 'messages',
           filter: `room_id=eq.${currentRoom.id}`
         },
-        (payload: { new: Message }) => {
+        async (payload: { new: Message }) => {
           console.log('New message received:', payload.new);
+          // Fetch display name for new message if not already cached
+          if (!userDisplayNames[payload.new.user_id]) {
+            await fetchDisplayName(payload.new.user_id);
+          }
           setMessages(prevMessages => [...prevMessages, payload.new]);
           scrollToBottom();
         }
@@ -86,11 +88,12 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
         .from('member_onboarding')
         .select('display_name')
         .eq('user_id', userId)
-        .maybeSingle();
+        .single();
 
       if (error) throw error;
       
       if (data) {
+        console.log('Display name fetched:', data.display_name, 'for user:', userId);
         setUserDisplayNames(prev => ({
           ...prev,
           [userId]: data.display_name

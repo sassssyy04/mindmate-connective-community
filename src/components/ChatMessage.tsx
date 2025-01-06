@@ -24,7 +24,7 @@ export function ChatMessage({ content, sender, timestamp, displayName }: ChatMes
         )}
       >
         {displayName && (
-          <p className="text-xs font-medium mb-1 opacity-70">{displayName}</p>
+          <p className="text-xs font-medium mb-1">{displayName}</p>
         )}
         <p className="text-sm">{content}</p>
         <span className="text-xs opacity-70 mt-1 block">
