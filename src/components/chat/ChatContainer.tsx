@@ -32,8 +32,9 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
       fetchMessages(currentRoom.id);
       fetchRoomMembers(currentRoom.id);
 
+      // Set up real-time subscription
       const messageChannel = supabase
-        .channel(`messages:${currentRoom.id}`)
+        .channel(`room-${currentRoom.id}`)
         .on(
           'postgres_changes',
           {
@@ -42,30 +43,32 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
             table: 'messages',
             filter: `room_id=eq.${currentRoom.id}`
           },
-          (payload: any) => {
-            console.log('New message received:', payload);
+          (payload: { new: Message }) => {
+            console.log('New message received:', payload.new);
             setMessages(prevMessages => {
-              const newMessage = payload.new;
               // Check if message already exists
-              if (prevMessages.some(msg => msg.id === newMessage.id)) {
-                console.log('Message already exists, skipping:', newMessage.id);
+              const messageExists = prevMessages.some(msg => msg.id === payload.new.id);
+              if (messageExists) {
+                console.log('Message already exists, skipping:', payload.new.id);
                 return prevMessages;
               }
-              console.log('Adding new message to state:', newMessage);
-              return [...prevMessages, newMessage];
+              
+              // Add new message
+              console.log('Adding new message to state:', payload.new);
+              return [...prevMessages, payload.new];
             });
           }
         )
         .subscribe((status) => {
-          console.log(`Message subscription status: ${status}`);
+          console.log(`Message subscription status for room ${currentRoom.id}:`, status);
         });
 
       return () => {
-        console.log('Cleaning up message subscription');
-        supabase.removeChannel(messageChannel);
+        console.log('Cleaning up message subscription for room:', currentRoom.id);
+        messageChannel.unsubscribe();
       };
     }
-  }, [currentRoom]);
+  }, [currentRoom?.id]); // Only re-run if room ID changes
 
   const fetchMessages = async (roomId: string) => {
     try {
@@ -112,15 +115,12 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
       const { error } = await supabase
         .from("messages")
         .insert([{ 
-          content: message, 
+          content: message.trim(), 
           user_id: currentUserId,
           room_id: currentRoom.id 
         }]);
 
-      if (error) {
-        console.error('Error details:', error);
-        throw error;
-      }
+      if (error) throw error;
 
       setMessage("");
       toast({
