@@ -4,9 +4,10 @@ interface ChatMessageProps {
   content: string;
   sender: "user" | "ai";
   timestamp: Date;
+  displayName?: string;
 }
 
-export function ChatMessage({ content, sender, timestamp }: ChatMessageProps) {
+export function ChatMessage({ content, sender, timestamp, displayName }: ChatMessageProps) {
   return (
     <div
       className={cn(
@@ -22,6 +23,9 @@ export function ChatMessage({ content, sender, timestamp }: ChatMessageProps) {
             : "bg-muted"
         )}
       >
+        {displayName && (
+          <p className="text-xs font-medium mb-1 opacity-70">{displayName}</p>
+        )}
         <p className="text-sm">{content}</p>
         <span className="text-xs opacity-70 mt-1 block">
           {timestamp.toLocaleTimeString()}

@@ -24,6 +24,7 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [roomMembers, setRoomMembers] = useState<any[]>([]);
+  const [userDisplayNames, setUserDisplayNames] = useState<Record<string, string>>({});
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const channelRef = useRef<any>(null);
@@ -78,6 +79,28 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
     };
   }, [currentRoom?.id]);
 
+  const fetchDisplayName = async (userId: string) => {
+    try {
+      console.log('Fetching display name for user:', userId);
+      const { data, error } = await supabase
+        .from('member_onboarding')
+        .select('display_name')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (error) throw error;
+      
+      if (data) {
+        setUserDisplayNames(prev => ({
+          ...prev,
+          [userId]: data.display_name
+        }));
+      }
+    } catch (error) {
+      console.error('Error fetching display name:', error);
+    }
+  };
+
   const fetchMessages = async (roomId: string) => {
     try {
       console.log('Fetching messages for room:', roomId);
@@ -90,6 +113,15 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
       if (error) throw error;
       console.log('Messages fetched:', data);
       setMessages(data || []);
+
+      // Fetch display names for all unique users
+      const uniqueUserIds = [...new Set(data?.map(msg => msg.user_id) || [])];
+      uniqueUserIds.forEach(userId => {
+        if (!userDisplayNames[userId]) {
+          fetchDisplayName(userId);
+        }
+      });
+
       scrollToBottom();
     } catch (error) {
       console.error('Error fetching messages:', error);
@@ -158,6 +190,7 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
             content={msg.content}
             sender={msg.user_id === currentUserId ? "user" : "ai"}
             timestamp={new Date(msg.created_at)}
+            displayName={userDisplayNames[msg.user_id]}
           />
         ))}
         <div ref={messagesEndRef} />
