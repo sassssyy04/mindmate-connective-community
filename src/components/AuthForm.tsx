@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 export function AuthForm() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -32,6 +32,12 @@ export function AuthForm() {
             toast({
               title: "Email not verified",
               description: "Please check your email and verify your account before signing in",
+              variant: "destructive",
+            });
+          } else if (error.message.includes("Invalid login credentials")) {
+            toast({
+              title: "User not found",
+              description: "No account exists with these credentials. Please check your email or sign up.",
               variant: "destructive",
             });
           } else {
