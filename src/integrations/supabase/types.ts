@@ -12,6 +12,7 @@ export type Database = {
       member_onboarding: {
         Row: {
           created_at: string
+          display_name: string
           id: string
           interests: string[] | null
           preferred_tribes: string[] | null
@@ -22,6 +23,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          display_name?: string
           id?: string
           interests?: string[] | null
           preferred_tribes?: string[] | null
@@ -32,6 +34,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          display_name?: string
           id?: string
           interests?: string[] | null
           preferred_tribes?: string[] | null
