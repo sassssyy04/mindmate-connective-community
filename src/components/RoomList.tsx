@@ -25,9 +25,10 @@ interface RoomListProps {
   rooms: Room[];
   onJoinRoom: (room: Room) => void;
   onCreateRoom: (name: string) => void;
+  currentRoomId?: string;
 }
 
-export const RoomList = ({ rooms, onJoinRoom, onCreateRoom }: RoomListProps) => {
+export const RoomList = ({ rooms, onJoinRoom, onCreateRoom, currentRoomId }: RoomListProps) => {
   const [newRoomName, setNewRoomName] = useState("");
   const [roomsWithMessages, setRoomsWithMessages] = useState<string[]>([]);
   const { toast } = useToast();
@@ -142,7 +143,9 @@ export const RoomList = ({ rooms, onJoinRoom, onCreateRoom }: RoomListProps) => 
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                {roomsWithMessages.includes(room.id) && isRoomActive(room) && (
+                {roomsWithMessages.includes(room.id) && 
+                 isRoomActive(room) && 
+                 currentRoomId !== room.id && (
                   <Button
                     variant="outline"
                     size="sm"

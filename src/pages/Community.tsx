@@ -171,6 +171,7 @@ const Community = () => {
             rooms={rooms}
             onJoinRoom={joinRoom}
             onCreateRoom={createRoom}
+            currentRoomId={currentRoom?.id}
           />
 
           {currentRoom ? (
