@@ -1,12 +1,13 @@
 import { motion } from "framer-motion";
 import { ArrowRight, MessageCircle, BookOpen, Users } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-cream-50">
+      {/* Hero Section */}
       <div className="pt-24 pb-16">
-        {/* Hero Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -81,6 +82,110 @@ const Index = () => {
                 <p className="text-gray-600">{feature.description}</p>
               </motion.div>
             ))}
+          </div>
+        </div>
+
+        {/* Resources Section */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-24">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-3xl font-bold text-gray-900">Mental Health Resources</h2>
+            <p className="mt-4 text-xl text-gray-600">Discover tools and guidance for your wellness journey</p>
+          </motion.div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              {
+                title: "Guided Meditations",
+                description: "Access our library of calming meditation sessions",
+                image: "/placeholder.svg",
+              },
+              {
+                title: "Wellness Workshops",
+                description: "Join interactive sessions with mental health experts",
+                image: "/placeholder.svg",
+              },
+              {
+                title: "Self-Help Guides",
+                description: "Explore comprehensive mental wellness resources",
+                image: "/placeholder.svg",
+              },
+            ].map((resource, index) => (
+              <motion.div
+                key={resource.title}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: index * 0.2 }}
+              >
+                <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
+                  <img
+                    src={resource.image}
+                    alt={resource.title}
+                    className="w-full h-48 object-cover"
+                  />
+                  <CardHeader>
+                    <CardTitle>{resource.title}</CardTitle>
+                    <CardDescription>{resource.description}</CardDescription>
+                  </CardHeader>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* Community Section */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-24">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-3xl font-bold text-gray-900">Join Our Community</h2>
+            <p className="mt-4 text-xl text-gray-600">Connect with facilitators and peers in a supportive environment</p>
+          </motion.div>
+          <div className="grid md:grid-cols-2 gap-8">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+            >
+              <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
+                <img
+                  src="https://images.unsplash.com/photo-1519389950473-47ba0277781c"
+                  alt="Group therapy session"
+                  className="w-full h-64 object-cover"
+                />
+                <CardHeader>
+                  <CardTitle>Group Support Sessions</CardTitle>
+                  <CardDescription>
+                    Join weekly group sessions led by experienced facilitators in a safe, supportive environment.
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+            >
+              <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
+                <img
+                  src="https://images.unsplash.com/photo-1605810230434-7631ac76ec81"
+                  alt="Workshop session"
+                  className="w-full h-64 object-cover"
+                />
+                <CardHeader>
+                  <CardTitle>Wellness Workshops</CardTitle>
+                  <CardDescription>
+                    Participate in interactive workshops focused on mental health education and skill-building.
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            </motion.div>
           </div>
         </div>
       </div>
