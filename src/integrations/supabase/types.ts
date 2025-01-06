@@ -9,6 +9,39 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      member_onboarding: {
+        Row: {
+          created_at: string
+          id: string
+          interests: string[] | null
+          preferred_tribes: string[] | null
+          status: Database["public"]["Enums"]["onboarding_status"]
+          updated_at: string
+          user_id: string
+          wellness_goals: string[] | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          interests?: string[] | null
+          preferred_tribes?: string[] | null
+          status?: Database["public"]["Enums"]["onboarding_status"]
+          updated_at?: string
+          user_id: string
+          wellness_goals?: string[] | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          interests?: string[] | null
+          preferred_tribes?: string[] | null
+          status?: Database["public"]["Enums"]["onboarding_status"]
+          updated_at?: string
+          user_id?: string
+          wellness_goals?: string[] | null
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string
@@ -102,7 +135,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      onboarding_status: "not_started" | "in_progress" | "completed"
     }
     CompositeTypes: {
       [_ in never]: never

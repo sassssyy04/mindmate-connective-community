@@ -18,33 +18,37 @@ export function AuthForm() {
     
     try {
       if (isSignUp) {
-        await signUp(email, password);
+        const { error } = await signUp(email, password);
+        if (error) throw error;
+        
         toast({
           title: "Account created",
           description: "Please check your email to verify your account",
         });
       } else {
-        try {
-          await signIn(email, password);
-          toast({
-            title: "Welcome back!",
-            description: "You have successfully signed in",
-          });
-        } catch (error: any) {
-          if (error.message.includes("email_not_confirmed")) {
+        const { error } = await signIn(email, password);
+        if (error) {
+          if (error.message.includes("Email not confirmed")) {
             toast({
               title: "Email not verified",
               description: "Please check your email and verify your account before signing in",
               variant: "destructive",
             });
           } else {
-            throw error; // Re-throw other errors to be caught by outer catch block
+            throw error;
           }
+        } else {
+          toast({
+            title: "Welcome back!",
+            description: "You have successfully signed in",
+          });
         }
       }
     } catch (error: any) {
+      console.error("Auth error:", error);
+      
       // Handle rate limiting error specifically
-      if (error.message.includes("over_email_send_rate_limit")) {
+      if (error.message?.includes("over_email_send_rate_limit")) {
         toast({
           title: "Please wait",
           description: "For security purposes, please wait a minute before trying again",
@@ -53,7 +57,7 @@ export function AuthForm() {
       } else {
         toast({
           title: "Error",
-          description: error.message,
+          description: error.message || "An error occurred during authentication",
           variant: "destructive",
         });
       }
@@ -86,6 +90,7 @@ export function AuthForm() {
             onChange={(e) => setPassword(e.target.value)}
             required
             disabled={isLoading}
+            minLength={6}
           />
         </div>
         <Button type="submit" className="w-full" disabled={isLoading}>
