@@ -27,48 +27,43 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
   const { toast } = useToast();
 
   useEffect(() => {
-    if (currentRoom) {
-      console.log('Setting up message subscription for room:', currentRoom.id);
-      fetchMessages(currentRoom.id);
-      fetchRoomMembers(currentRoom.id);
+    if (!currentRoom?.id) return;
 
-      // Set up real-time subscription
-      const messageChannel = supabase
-        .channel(`room-${currentRoom.id}`)
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'messages',
-            filter: `room_id=eq.${currentRoom.id}`
-          },
-          (payload: { new: Message }) => {
-            console.log('New message received:', payload.new);
-            setMessages(prevMessages => {
-              // Check if message already exists
-              const messageExists = prevMessages.some(msg => msg.id === payload.new.id);
-              if (messageExists) {
-                console.log('Message already exists, skipping:', payload.new.id);
-                return prevMessages;
-              }
-              
-              // Add new message
-              console.log('Adding new message to state:', payload.new);
-              return [...prevMessages, payload.new];
-            });
-          }
-        )
-        .subscribe((status) => {
-          console.log(`Message subscription status for room ${currentRoom.id}:`, status);
-        });
+    console.log('Setting up message subscription for room:', currentRoom.id);
+    fetchMessages(currentRoom.id);
+    fetchRoomMembers(currentRoom.id);
 
-      return () => {
-        console.log('Cleaning up message subscription for room:', currentRoom.id);
-        messageChannel.unsubscribe();
-      };
-    }
-  }, [currentRoom?.id]); // Only re-run if room ID changes
+    const channel = supabase.channel('room_messages')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `room_id=eq.${currentRoom.id}`
+        },
+        (payload) => {
+          console.log('New message received:', payload.new);
+          setMessages((currentMessages) => {
+            // Check if message already exists to prevent duplicates
+            if (currentMessages.find((msg) => msg.id === payload.new.id)) {
+              console.log('Message already exists, skipping');
+              return currentMessages;
+            }
+            console.log('Adding new message to state');
+            return [...currentMessages, payload.new as Message];
+          });
+        }
+      )
+      .subscribe((status) => {
+        console.log('Subscription status:', status);
+      });
+
+    return () => {
+      console.log('Cleaning up subscription for room:', currentRoom.id);
+      channel.unsubscribe();
+    };
+  }, [currentRoom?.id]);
 
   const fetchMessages = async (roomId: string) => {
     try {
