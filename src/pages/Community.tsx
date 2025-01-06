@@ -59,8 +59,14 @@ const Community = () => {
           },
           (payload: any) => {
             console.log('New message received:', payload);
-            // Update messages state with the new message
-            setMessages(prevMessages => [...prevMessages, payload.new]);
+            setMessages(prevMessages => {
+              // Check if message already exists to prevent duplicates
+              const messageExists = prevMessages.some(msg => msg.id === payload.new.id);
+              if (messageExists) {
+                return prevMessages;
+              }
+              return [...prevMessages, payload.new];
+            });
           }
         )
         .subscribe();
