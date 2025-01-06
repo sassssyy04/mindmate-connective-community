@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
 import Navigation from "./components/Navigation";
 import Index from "./pages/Index";
 import Chat from "./pages/Chat";
@@ -8,15 +9,17 @@ import "./App.css";
 
 function App() {
   return (
-    <Router>
-      <Navigation />
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/chat" element={<Chat />} />
-        <Route path="/resources" element={<Resources />} />
-        <Route path="/community" element={<Community />} />
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Navigation />
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/chat" element={<Chat />} />
+          <Route path="/resources" element={<Resources />} />
+          <Route path="/community" element={<Community />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 
