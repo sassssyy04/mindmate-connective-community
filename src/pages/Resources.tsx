@@ -3,19 +3,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 const Resources = () => {
   return (
-    <div className="min-h-screen bg-cream-50 pt-24 pb-16">
+    <div className="min-h-screen bg-cream-50">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+        className="container mx-auto px-4 py-8"
       >
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Mental Health Resources</h1>
           <p className="text-xl text-gray-600">Discover tools and guidance for your wellness journey</p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[
             {
               title: "Guided Meditations",
@@ -60,7 +60,7 @@ const Resources = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: index * 0.1 }}
             >
-              <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
+              <Card className="h-full overflow-hidden hover:shadow-lg transition-shadow duration-200">
                 <img
                   src={resource.image}
                   alt={resource.title}
