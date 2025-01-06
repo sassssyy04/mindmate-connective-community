@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,7 +28,7 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
   };
 
   // Set up real-time subscription
-  useState(() => {
+  useEffect(() => {
     if (!currentRoom?.id) return;
 
     console.log('Setting up message subscription for room:', currentRoom.id);
