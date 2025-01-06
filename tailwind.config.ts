@@ -19,6 +19,15 @@ export default {
     },
     extend: {
       colors: {
+        // Primary Colors
+        "tribe-blue": "#049DD3",
+        "tribe-mint": "#77C5BE",
+        "tribe-green": "#019640",
+        // Secondary Colors
+        "tribe-purple": "#6A1B9A",
+        "tribe-grey": "#555555",
+        "tribe-yellow": "#FFC107",
+        // Original theme colors kept for compatibility
         sage: {
           50: "#f2f5f3",
           100: "#e6ebe7",
@@ -72,6 +81,9 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
       },
+      fontFamily: {
+        poppins: ["Poppins", "sans-serif"],
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
@@ -86,19 +98,10 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        float: {
-          "0%, 100%": { transform: "translateY(0)" },
-          "50%": { transform: "translateY(-10px)" },
-        },
-        shimmer: {
-          "100%": { transform: "translateX(100%)" },
-        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        float: "float 6s ease-in-out infinite",
-        shimmer: "shimmer 2s infinite",
       },
     },
   },

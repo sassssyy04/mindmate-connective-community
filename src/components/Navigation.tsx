@@ -13,7 +13,7 @@ const Navigation = () => {
   ];
 
   return (
-    <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b border-gray-100">
+    <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b border-tribe-mint/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
@@ -35,7 +35,7 @@ const Navigation = () => {
               <Link
                 key={item.name}
                 to={item.path}
-                className="text-gray-600 hover:text-sage-500 transition-colors duration-200 font-medium"
+                className="text-tribe-grey hover:text-tribe-blue transition-colors duration-200 font-medium"
               >
                 {item.name}
               </Link>
@@ -46,7 +46,7 @@ const Navigation = () => {
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="text-gray-600 hover:text-sage-500 focus:outline-none"
+              className="text-tribe-grey hover:text-tribe-blue focus:outline-none"
             >
               {isOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -61,7 +61,7 @@ const Navigation = () => {
                 <Link
                   key={item.name}
                   to={item.path}
-                  className="block px-3 py-2 text-gray-600 hover:text-sage-500 hover:bg-gray-50 transition-colors duration-200"
+                  className="block px-3 py-2 text-tribe-grey hover:text-tribe-blue hover:bg-blue-50 transition-colors duration-200"
                   onClick={() => setIsOpen(false)}
                 >
                   {item.name}
