@@ -24,7 +24,7 @@ const Navigation = () => {
               <img 
                 src="/lovable-uploads/c7e0dc4a-5759-4b76-9276-bce3c18ee062.png" 
                 alt="Hytribe Logo" 
-                className="h-20 w-auto" // Changed from h-26 to h-20
+                className="h-18 w-auto" // Changed from h-20 to h-18
               />
             </Link>
           </div>
