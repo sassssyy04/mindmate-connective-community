@@ -15,6 +15,7 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<any[]>([]);
   const [roomMembers, setRoomMembers] = useState<any[]>([]);
+  const [displayNames, setDisplayNames] = useState<Record<string, string>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const channelRef = useRef<any>(null);
 
@@ -26,6 +27,27 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Fetch display names for all users in messages
+  const fetchDisplayNames = async (messages: any[]) => {
+    const userIds = [...new Set(messages.map(msg => msg.user_id))];
+    try {
+      const { data, error } = await supabase
+        .from('member_onboarding')
+        .select('user_id, display_name')
+        .in('user_id', userIds);
+
+      if (error) throw error;
+
+      const names: Record<string, string> = {};
+      data?.forEach(item => {
+        names[item.user_id] = item.display_name;
+      });
+      setDisplayNames(names);
+    } catch (error) {
+      console.error('Error fetching display names:', error);
+    }
+  };
 
   // Fetch messages
   const fetchMessages = async () => {
@@ -40,6 +62,9 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
       if (error) throw error;
       console.log('Messages fetched:', data);
       setMessages(data || []);
+      if (data) {
+        fetchDisplayNames(data);
+      }
     } catch (error) {
       console.error('Error fetching messages:', error);
     }
@@ -139,6 +164,7 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
             content={msg.content}
             sender={msg.user_id === currentUserId ? "user" : "ai"}
             timestamp={new Date(msg.created_at)}
+            displayName={displayNames[msg.user_id]}
           />
         ))}
         <div ref={messagesEndRef} />
