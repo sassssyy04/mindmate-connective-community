@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -10,6 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Room {
   id: string;
@@ -28,6 +29,7 @@ interface RoomListProps {
 export const RoomList = ({ rooms, onJoinRoom, onCreateRoom }: RoomListProps) => {
   const [newRoomName, setNewRoomName] = useState("");
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleCreateRoom = () => {
     if (!newRoomName.trim()) {
@@ -40,6 +42,30 @@ export const RoomList = ({ rooms, onJoinRoom, onCreateRoom }: RoomListProps) => 
     }
     onCreateRoom(newRoomName);
     setNewRoomName("");
+  };
+
+  const handleDeleteRoom = async (roomId: string) => {
+    try {
+      console.log('Deleting room:', roomId);
+      const { error } = await supabase
+        .from('rooms')
+        .delete()
+        .eq('id', roomId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Room deleted successfully",
+      });
+    } catch (error) {
+      console.error('Error deleting room:', error);
+      toast({
+        title: "Error",
+        description: (error as Error).message,
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -72,13 +98,29 @@ export const RoomList = ({ rooms, onJoinRoom, onCreateRoom }: RoomListProps) => 
         {rooms.map((room) => (
           <div
             key={room.id}
-            className="p-3 rounded-lg border cursor-pointer hover:bg-gray-50 transition-colors"
-            onClick={() => onJoinRoom(room)}
+            className="p-3 rounded-lg border hover:bg-gray-50 transition-colors"
           >
-            <h3 className="font-medium">{room.name}</h3>
-            <p className="text-sm text-gray-500">
-              Expires: {new Date(room.expires_at).toLocaleString()}
-            </p>
+            <div className="flex justify-between items-start">
+              <div 
+                className="cursor-pointer flex-grow"
+                onClick={() => onJoinRoom(room)}
+              >
+                <h3 className="font-medium">{room.name}</h3>
+                <p className="text-sm text-gray-500">
+                  Expires: {new Date(room.expires_at).toLocaleString()}
+                </p>
+              </div>
+              {user?.id === room.created_by && (
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  onClick={() => handleDeleteRoom(room.id)}
+                  className="ml-2"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
           </div>
         ))}
       </div>
