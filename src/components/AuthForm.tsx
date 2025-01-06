@@ -24,11 +24,23 @@ export function AuthForm() {
           description: "Please check your email to verify your account",
         });
       } else {
-        await signIn(email, password);
-        toast({
-          title: "Welcome back!",
-          description: "You have successfully signed in",
-        });
+        try {
+          await signIn(email, password);
+          toast({
+            title: "Welcome back!",
+            description: "You have successfully signed in",
+          });
+        } catch (error: any) {
+          if (error.message.includes("email_not_confirmed")) {
+            toast({
+              title: "Email not verified",
+              description: "Please check your email and verify your account before signing in",
+              variant: "destructive",
+            });
+          } else {
+            throw error; // Re-throw other errors to be caught by outer catch block
+          }
+        }
       }
     } catch (error: any) {
       // Handle rate limiting error specifically
