@@ -190,7 +190,7 @@ const Community = () => {
     if (!message.trim() || !currentRoom) return;
 
     try {
-      console.log('Sending message:', message);
+      console.log('Sending message to room:', currentRoom.id);
       const { error } = await supabase
         .from("messages")
         .insert([{ 
@@ -199,7 +199,10 @@ const Community = () => {
           room_id: currentRoom.id 
         }]);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error details:', error);
+        throw error;
+      }
 
       setMessage("");
       toast({
