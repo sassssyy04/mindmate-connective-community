@@ -64,5 +64,5 @@ export const useMessages = (roomId: string) => {
     }
   }, [roomId]);
 
-  return { messages, sendMessage };
+  return { messages, sendMessage, fetchMessages };
 };

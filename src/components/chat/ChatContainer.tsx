@@ -19,7 +19,7 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const channelRef = useRef<any>(null);
   
-  const { messages, sendMessage } = useMessages(currentRoom?.id);
+  const { messages, sendMessage, fetchMessages } = useMessages(currentRoom?.id);
   const userIds = [...new Set(messages.map(msg => msg.user_id))];
   const displayNames = useDisplayNames(userIds);
 
@@ -49,7 +49,9 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
           table: 'messages',
           filter: `room_id=eq.${currentRoom.id}`
         },
-        () => {
+        (payload) => {
+          console.log('New message received:', payload);
+          fetchMessages();
           scrollToBottom();
         }
       )
@@ -63,7 +65,7 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
         supabase.removeChannel(channelRef.current);
       }
     };
-  }, [currentRoom?.id]);
+  }, [currentRoom?.id, fetchMessages]);
 
   const fetchRoomMembers = async (roomId: string) => {
     try {
