@@ -26,6 +26,7 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
   const [roomMembers, setRoomMembers] = useState<any[]>([]);
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const channelRef = useRef<any>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -42,7 +43,15 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
     fetchMessages(currentRoom.id);
     fetchRoomMembers(currentRoom.id);
 
-    const channel = supabase.channel('room_messages')
+    // Clean up previous subscription if it exists
+    if (channelRef.current) {
+      console.log('Cleaning up previous subscription');
+      supabase.removeChannel(channelRef.current);
+    }
+
+    // Create new subscription
+    channelRef.current = supabase
+      .channel(`room:${currentRoom.id}`)
       .on(
         'postgres_changes',
         {
@@ -53,16 +62,8 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
         },
         (payload: { new: Message }) => {
           console.log('New message received:', payload.new);
-          setMessages(prevMessages => {
-            // Check if message already exists
-            const messageExists = prevMessages.some(msg => msg.id === payload.new.id);
-            if (messageExists) {
-              console.log('Message already exists, skipping update');
-              return prevMessages;
-            }
-            console.log('Adding new message to state');
-            return [...prevMessages, payload.new];
-          });
+          setMessages(prevMessages => [...prevMessages, payload.new]);
+          scrollToBottom();
         }
       )
       .subscribe((status) => {
@@ -70,8 +71,10 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
       });
 
     return () => {
-      console.log('Cleaning up subscription');
-      supabase.removeChannel(channel);
+      if (channelRef.current) {
+        console.log('Cleaning up subscription');
+        supabase.removeChannel(channelRef.current);
+      }
     };
   }, [currentRoom?.id]);
 
@@ -87,6 +90,7 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
       if (error) throw error;
       console.log('Messages fetched:', data);
       setMessages(data || []);
+      scrollToBottom();
     } catch (error) {
       console.error('Error fetching messages:', error);
       toast({
@@ -128,10 +132,7 @@ export const ChatContainer = ({ currentRoom, currentUserId }: ChatContainerProps
       if (error) throw error;
 
       setMessage("");
-      toast({
-        title: "Success",
-        description: "Message sent successfully",
-      });
+      scrollToBottom();
     } catch (error) {
       console.error('Error sending message:', error);
       toast({
