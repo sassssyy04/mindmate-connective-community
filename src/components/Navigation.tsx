@@ -23,9 +23,9 @@ const Navigation = () => {
           <div className="flex items-center">
             <Link to="/" className="flex items-center">
               <img
-                src="/lovable-uploads/c7e0dc4a-5759-4b76-9276-bce3c18ee062.png"
+                src="/lovable-uploads/1bf2282b-be2f-4745-9685-586e3ad56eb4.png"
                 alt="Hytribe Logo"
-                className="h-16 w-auto"
+                className="h-8 w-auto"
               />
             </Link>
           </div>
