@@ -88,12 +88,15 @@ const Community = () => {
     try {
       console.log('Joining room:', room.id);
       
-      const { data: existingMember } = await supabase
+      // Changed from .single() to .maybeSingle() to handle no results case
+      const { data: existingMember, error: memberError } = await supabase
         .from('room_members')
         .select('id')
         .eq('room_id', room.id)
         .eq('user_id', user?.id)
-        .single();
+        .maybeSingle();
+
+      if (memberError) throw memberError;
 
       if (existingMember) {
         console.log('User is already a member of this room');
@@ -105,11 +108,11 @@ const Community = () => {
         return;
       }
 
-      const { error } = await supabase
+      const { error: joinError } = await supabase
         .from('room_members')
         .insert([{ room_id: room.id, user_id: user?.id }]);
 
-      if (error) throw error;
+      if (joinError) throw joinError;
 
       setCurrentRoom(room);
       toast({
