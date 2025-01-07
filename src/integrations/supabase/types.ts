@@ -9,6 +9,47 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      activity_tracking: {
+        Row: {
+          activity_type: string
+          created_at: string
+          duration_minutes: number | null
+          id: string
+          room_id: string | null
+          sleep_hours: number | null
+          steps_count: number | null
+          user_id: string
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          room_id?: string | null
+          sleep_hours?: number | null
+          steps_count?: number | null
+          user_id: string
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          room_id?: string | null
+          sleep_hours?: number | null
+          steps_count?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_tracking_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       member_onboarding: {
         Row: {
           created_at: string
@@ -130,6 +171,41 @@ export type Database = {
         }
         Relationships: []
       }
+      sentiment_tracking: {
+        Row: {
+          confidence_score: number
+          created_at: string
+          id: string
+          message_id: string
+          sentiment: Database["public"]["Enums"]["sentiment_type"]
+          user_id: string
+        }
+        Insert: {
+          confidence_score: number
+          created_at?: string
+          id?: string
+          message_id: string
+          sentiment: Database["public"]["Enums"]["sentiment_type"]
+          user_id: string
+        }
+        Update: {
+          confidence_score?: number
+          created_at?: string
+          id?: string
+          message_id?: string
+          sentiment?: Database["public"]["Enums"]["sentiment_type"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sentiment_tracking_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -139,6 +215,7 @@ export type Database = {
     }
     Enums: {
       onboarding_status: "not_started" | "in_progress" | "completed"
+      sentiment_type: "positive" | "neutral" | "negative"
     }
     CompositeTypes: {
       [_ in never]: never

@@ -12,6 +12,7 @@ const Navigation = () => {
   const navItems = [
     { name: "Home", path: "/" },
     { name: "AI Chat", path: "/chat" },
+    { name: "Dashboard", path: "/dashboard" },
     { name: "Resources", path: "/resources" },
     { name: "Community", path: "/community" },
   ];
@@ -25,7 +26,7 @@ const Navigation = () => {
               <img
                 src="/lovable-uploads/1bf2282b-be2f-4745-9685-586e3ad56eb4.png"
                 alt="Hytribe Logo"
-                className="h-12 w-auto" // Increased from h-8 to h-12
+                className="h-12 w-auto"
               />
             </Link>
           </div>
