@@ -73,7 +73,7 @@ const Dashboard = () => {
     if (isLoading) {
       return (
         <div className="flex items-center justify-center h-[400px]">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#9b87f5]" />
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-tribe-blue" />
         </div>
       );
     }
@@ -119,11 +119,11 @@ const Dashboard = () => {
       
       <Tabs defaultValue="sentiment" className="space-y-4">
         <TabsList className="bg-white/80 backdrop-blur-sm">
-          <TabsTrigger value="sentiment" className="flex items-center gap-2 data-[state=active]:bg-[#9b87f5] data-[state=active]:text-white">
+          <TabsTrigger value="sentiment" className="flex items-center gap-2 data-[state=active]:bg-tribe-blue data-[state=active]:text-white">
             <ChartBar className="h-4 w-4" />
             Sentiment Analysis
           </TabsTrigger>
-          <TabsTrigger value="activity" className="flex items-center gap-2 data-[state=active]:bg-[#9b87f5] data-[state=active]:text-white">
+          <TabsTrigger value="activity" className="flex items-center gap-2 data-[state=active]:bg-tribe-blue data-[state=active]:text-white">
             <Activity className="h-4 w-4" />
             Activity Tracking
           </TabsTrigger>
@@ -140,7 +140,7 @@ const Dashboard = () => {
                 isSentimentLoading,
                 sentimentError,
                 "No sentiment data available yet. Start chatting to see your sentiment analysis!",
-                "#9b87f5"
+                "#049DD3"
               )}
             </CardContent>
           </Card>
@@ -157,7 +157,7 @@ const Dashboard = () => {
                 isActivityLoading,
                 activityError,
                 "No activity data available yet. Your activities will be tracked as you use the app!",
-                "#7E69AB"
+                "#049DD3"
               )}
             </CardContent>
           </Card>

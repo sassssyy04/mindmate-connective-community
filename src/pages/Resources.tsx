@@ -68,7 +68,7 @@ const Resources = () => {
                 />
                 <CardHeader>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="px-3 py-1 bg-[#9b87f5]/10 text-[#9b87f5] rounded-full text-sm">
+                    <span className="px-3 py-1 bg-tribe-blue/10 text-tribe-blue rounded-full text-sm">
                       {resource.category}
                     </span>
                   </div>
@@ -76,7 +76,7 @@ const Resources = () => {
                   <CardDescription className="text-[#8E9196]">{resource.description}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <button className="w-full px-4 py-2 bg-[#9b87f5] text-white rounded-lg hover:bg-[#7E69AB] transition-colors duration-200">
+                  <button className="w-full px-4 py-2 bg-tribe-blue text-white rounded-lg hover:bg-tribe-mint transition-colors duration-200">
                     Access Resource
                   </button>
                 </CardContent>
