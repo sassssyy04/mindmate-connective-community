@@ -94,7 +94,7 @@ export default function Chat() {
   }
 
   return (
-    <div className="flex flex-col h-screen max-w-3xl mx-auto px-4 pt-20 pb-4">
+    <div className="flex flex-col h-screen max-w-3xl mx-auto px-4 pt-20 pb-4 bg-gradient-to-b from-[#fdfcfb] to-[#e2d1c3]">
       <div className="flex-1 space-y-4 mb-4">
         <ScrollArea ref={scrollAreaRef} className="h-[calc(100vh-180px)] pr-4">
           <div className="space-y-4">
@@ -115,10 +115,15 @@ export default function Chat() {
           value={inputMessage}
           onChange={(e) => setInputMessage(e.target.value)}
           placeholder="Type your message..."
-          className="flex-1"
+          className="flex-1 bg-white/80 backdrop-blur-sm border-[#9b87f5]/20 focus:border-[#9b87f5]"
           disabled={isLoading}
         />
-        <Button type="submit" size="icon" disabled={isLoading}>
+        <Button 
+          type="submit" 
+          size="icon" 
+          disabled={isLoading}
+          className="bg-[#9b87f5] hover:bg-[#7E69AB]"
+        >
           <Send className="h-4 w-4" />
         </Button>
       </form>

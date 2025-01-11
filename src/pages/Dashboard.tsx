@@ -43,7 +43,6 @@ const Dashboard = () => {
     enabled: !!user,
   });
 
-  // Transform data for visualization
   const sentimentStats = sentimentData?.reduce((acc: any, curr) => {
     acc[curr.sentiment] = (acc[curr.sentiment] || 0) + 1;
     return acc;
@@ -74,7 +73,7 @@ const Dashboard = () => {
     if (isLoading) {
       return (
         <div className="flex items-center justify-center h-[400px]">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#9b87f5]" />
         </div>
       );
     }
@@ -92,7 +91,7 @@ const Dashboard = () => {
     if (!data?.length) {
       return (
         <Alert>
-          <AlertDescription>
+          <AlertDescription className="text-[#8E9196]">
             {emptyMessage}
           </AlertDescription>
         </Alert>
@@ -103,9 +102,9 @@ const Dashboard = () => {
       <div className="h-[400px]">
         <ChartContainer config={{}}>
           <BarChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
+            <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+            <XAxis dataKey="name" stroke="#8E9196" />
+            <YAxis stroke="#8E9196" />
             <Tooltip />
             <Bar dataKey="count" fill={chartColor} />
           </BarChart>
@@ -115,50 +114,50 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="container mx-auto p-6 pt-24">
-      <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
+    <div className="container mx-auto p-6 pt-24 bg-gradient-to-b from-[#fdfcfb] to-[#e2d1c3] min-h-screen">
+      <h1 className="text-2xl font-bold mb-6 text-[#221F26]">Dashboard</h1>
       
       <Tabs defaultValue="sentiment" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="sentiment" className="flex items-center gap-2">
+        <TabsList className="bg-white/80 backdrop-blur-sm">
+          <TabsTrigger value="sentiment" className="flex items-center gap-2 data-[state=active]:bg-[#9b87f5] data-[state=active]:text-white">
             <ChartBar className="h-4 w-4" />
             Sentiment Analysis
           </TabsTrigger>
-          <TabsTrigger value="activity" className="flex items-center gap-2">
+          <TabsTrigger value="activity" className="flex items-center gap-2 data-[state=active]:bg-[#9b87f5] data-[state=active]:text-white">
             <Activity className="h-4 w-4" />
             Activity Tracking
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="sentiment">
-          <Card>
+          <Card className="bg-white/80 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle>Sentiment Distribution</CardTitle>
+              <CardTitle className="text-[#221F26]">Sentiment Distribution</CardTitle>
             </CardHeader>
             <CardContent>
               {renderContent(
-                sentimentChartData,
+                sentimentData,
                 isSentimentLoading,
                 sentimentError,
                 "No sentiment data available yet. Start chatting to see your sentiment analysis!",
-                "#8884d8"
+                "#9b87f5"
               )}
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="activity">
-          <Card>
+          <Card className="bg-white/80 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle>Activity Summary</CardTitle>
+              <CardTitle className="text-[#221F26]">Activity Summary</CardTitle>
             </CardHeader>
             <CardContent>
               {renderContent(
-                activityChartData,
+                activityData,
                 isActivityLoading,
                 activityError,
                 "No activity data available yet. Your activities will be tracked as you use the app!",
-                "#82ca9d"
+                "#7E69AB"
               )}
             </CardContent>
           </Card>

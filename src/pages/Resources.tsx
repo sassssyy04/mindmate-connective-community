@@ -3,16 +3,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 const Resources = () => {
   return (
-    <div className="min-h-screen bg-cream-50">
+    <div className="min-h-screen bg-gradient-to-b from-[#fdfcfb] to-[#e2d1c3]">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
-        className="container mx-auto px-4 py-8"
+        className="container mx-auto px-4 py-8 pt-24"
       >
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Mental Health Resources</h1>
-          <p className="text-xl text-gray-600">Discover tools and guidance for your wellness journey</p>
+          <h1 className="text-4xl font-bold text-[#221F26] mb-4">Mental Health Resources</h1>
+          <p className="text-xl text-[#8E9196]">Discover tools and guidance for your wellness journey</p>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -60,7 +60,7 @@ const Resources = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: index * 0.1 }}
             >
-              <Card className="h-full overflow-hidden hover:shadow-lg transition-shadow duration-200">
+              <Card className="h-full overflow-hidden hover:shadow-lg transition-shadow duration-200 bg-white/80 backdrop-blur-sm">
                 <img
                   src={resource.image}
                   alt={resource.title}
@@ -68,15 +68,15 @@ const Resources = () => {
                 />
                 <CardHeader>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="px-3 py-1 bg-sage-50 text-sage-600 rounded-full text-sm">
+                    <span className="px-3 py-1 bg-[#9b87f5]/10 text-[#9b87f5] rounded-full text-sm">
                       {resource.category}
                     </span>
                   </div>
-                  <CardTitle>{resource.title}</CardTitle>
-                  <CardDescription>{resource.description}</CardDescription>
+                  <CardTitle className="text-[#221F26]">{resource.title}</CardTitle>
+                  <CardDescription className="text-[#8E9196]">{resource.description}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <button className="w-full px-4 py-2 bg-sage-400 text-white rounded-lg hover:bg-sage-500 transition-colors duration-200">
+                  <button className="w-full px-4 py-2 bg-[#9b87f5] text-white rounded-lg hover:bg-[#7E69AB] transition-colors duration-200">
                     Access Resource
                   </button>
                 </CardContent>
