@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer } from "@/components/ui/chart";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Activity, ChartBar } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
@@ -27,7 +27,7 @@ const Dashboard = () => {
           )
         `)
         .eq('user_id', user?.id)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: true });
       
       if (error) {
         console.error('Error fetching sentiment data:', error);
@@ -47,7 +47,7 @@ const Dashboard = () => {
         .from('activity_tracking')
         .select('*')
         .eq('user_id', user?.id)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: true });
       
       if (error) {
         console.error('Error fetching activity data:', error);
@@ -62,30 +62,20 @@ const Dashboard = () => {
   const formatSentimentData = (data: any[]) => {
     if (!data) return [];
     
-    const sentimentCounts = data.reduce((acc: any, curr) => {
-      const sentiment = curr.sentiment;
-      acc[sentiment] = (acc[sentiment] || 0) + 1;
-      return acc;
-    }, {});
-
-    return Object.entries(sentimentCounts).map(([sentiment, count]) => ({
-      name: sentiment.charAt(0).toUpperCase() + sentiment.slice(1),
-      count: count as number
+    return data.map(item => ({
+      date: new Date(item.created_at).toLocaleDateString(),
+      value: item.sentiment === 'positive' ? 1 : item.sentiment === 'neutral' ? 0 : -1,
+      confidence: item.confidence_score
     }));
   };
 
   const formatActivityData = (data: any[]) => {
     if (!data) return [];
     
-    const activityCounts = data.reduce((acc: any, curr) => {
-      const type = curr.activity_type;
-      acc[type] = (acc[type] || 0) + 1;
-      return acc;
-    }, {});
-
-    return Object.entries(activityCounts).map(([type, count]) => ({
-      name: type.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
-      count: count as number
+    return data.map(item => ({
+      date: new Date(item.created_at).toLocaleDateString(),
+      duration: item.duration_minutes,
+      type: item.activity_type
     }));
   };
 
@@ -94,8 +84,12 @@ const Dashboard = () => {
     isLoading: boolean, 
     error: any, 
     emptyMessage: string,
-    chartColor: string,
-    formatFn: (data: any[]) => any[]
+    formatFn: (data: any[]) => any[],
+    renderProps: {
+      dataKey: string;
+      stroke: string;
+      name: string;
+    }
   ) => {
     if (isLoading) {
       return (
@@ -128,16 +122,40 @@ const Dashboard = () => {
     const chartData = formatFn(rawData);
 
     return (
-      <div className="h-[400px]">
-        <ChartContainer config={{}}>
-          <BarChart data={chartData}>
+      <div className="h-[400px] w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-            <XAxis dataKey="name" stroke="#8E9196" />
-            <YAxis stroke="#8E9196" />
-            <Tooltip />
-            <Bar dataKey="count" fill={chartColor} />
-          </BarChart>
-        </ChartContainer>
+            <XAxis 
+              dataKey="date" 
+              stroke="#8E9196"
+              tick={{ fill: '#8E9196' }}
+              tickLine={{ stroke: '#8E9196' }}
+            />
+            <YAxis 
+              stroke="#8E9196"
+              tick={{ fill: '#8E9196' }}
+              tickLine={{ stroke: '#8E9196' }}
+            />
+            <Tooltip 
+              contentStyle={{ 
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                border: '1px solid #E2E8F0',
+                borderRadius: '8px',
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+              }}
+            />
+            <Line 
+              type="monotone"
+              dataKey={renderProps.dataKey}
+              stroke={renderProps.stroke}
+              name={renderProps.name}
+              strokeWidth={2}
+              dot={{ stroke: renderProps.stroke, strokeWidth: 2, r: 4 }}
+              activeDot={{ r: 6, stroke: renderProps.stroke, strokeWidth: 2 }}
+            />
+          </LineChart>
+        </ResponsiveContainer>
       </div>
     );
   };
@@ -161,7 +179,7 @@ const Dashboard = () => {
         <TabsContent value="sentiment">
           <Card className="bg-white/80 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="text-[#221F26]">Sentiment Distribution</CardTitle>
+              <CardTitle className="text-[#221F26]">Sentiment Over Time</CardTitle>
             </CardHeader>
             <CardContent>
               {renderContent(
@@ -169,8 +187,12 @@ const Dashboard = () => {
                 isSentimentLoading,
                 sentimentError,
                 "No sentiment data available yet. Start chatting to see your sentiment analysis!",
-                "#049DD3",
-                formatSentimentData
+                formatSentimentData,
+                {
+                  dataKey: "value",
+                  stroke: "#049DD3",
+                  name: "Sentiment"
+                }
               )}
             </CardContent>
           </Card>
@@ -179,7 +201,7 @@ const Dashboard = () => {
         <TabsContent value="activity">
           <Card className="bg-white/80 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="text-[#221F26]">Activity Summary</CardTitle>
+              <CardTitle className="text-[#221F26]">Activity Duration Over Time</CardTitle>
             </CardHeader>
             <CardContent>
               {renderContent(
@@ -187,8 +209,12 @@ const Dashboard = () => {
                 isActivityLoading,
                 activityError,
                 "No activity data available yet. Your activities will be tracked as you use the app!",
-                "#049DD3",
-                formatActivityData
+                formatActivityData,
+                {
+                  dataKey: "duration",
+                  stroke: "#77C5BE",
+                  name: "Duration (minutes)"
+                }
               )}
             </CardContent>
           </Card>
