@@ -17,10 +17,22 @@ const Dashboard = () => {
       console.log('Fetching sentiment data for user:', user?.id);
       const { data, error } = await supabase
         .from('sentiment_tracking')
-        .select('*')
-        .eq('user_id', user?.id);
+        .select(`
+          id,
+          sentiment,
+          confidence_score,
+          created_at,
+          messages (
+            content
+          )
+        `)
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching sentiment data:', error);
+        throw error;
+      }
       console.log('Sentiment data fetched:', data);
       return data;
     },
@@ -34,41 +46,56 @@ const Dashboard = () => {
       const { data, error } = await supabase
         .from('activity_tracking')
         .select('*')
-        .eq('user_id', user?.id);
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching activity data:', error);
+        throw error;
+      }
       console.log('Activity data fetched:', data);
       return data;
     },
     enabled: !!user,
   });
 
-  const sentimentStats = sentimentData?.reduce((acc: any, curr) => {
-    acc[curr.sentiment] = (acc[curr.sentiment] || 0) + 1;
-    return acc;
-  }, {});
+  const formatSentimentData = (data: any[]) => {
+    if (!data) return [];
+    
+    const sentimentCounts = data.reduce((acc: any, curr) => {
+      const sentiment = curr.sentiment;
+      acc[sentiment] = (acc[sentiment] || 0) + 1;
+      return acc;
+    }, {});
 
-  const sentimentChartData = sentimentStats ? Object.keys(sentimentStats).map(key => ({
-    name: key,
-    count: sentimentStats[key]
-  })) : [];
+    return Object.entries(sentimentCounts).map(([sentiment, count]) => ({
+      name: sentiment.charAt(0).toUpperCase() + sentiment.slice(1),
+      count: count as number
+    }));
+  };
 
-  const activityStats = activityData?.reduce((acc: any, curr) => {
-    acc[curr.activity_type] = (acc[curr.activity_type] || 0) + 1;
-    return acc;
-  }, {});
+  const formatActivityData = (data: any[]) => {
+    if (!data) return [];
+    
+    const activityCounts = data.reduce((acc: any, curr) => {
+      const type = curr.activity_type;
+      acc[type] = (acc[type] || 0) + 1;
+      return acc;
+    }, {});
 
-  const activityChartData = activityStats ? Object.keys(activityStats).map(key => ({
-    name: key,
-    count: activityStats[key]
-  })) : [];
+    return Object.entries(activityCounts).map(([type, count]) => ({
+      name: type.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+      count: count as number
+    }));
+  };
 
   const renderContent = (
-    data: any[], 
+    rawData: any[], 
     isLoading: boolean, 
     error: any, 
     emptyMessage: string,
-    chartColor: string
+    chartColor: string,
+    formatFn: (data: any[]) => any[]
   ) => {
     if (isLoading) {
       return (
@@ -88,7 +115,7 @@ const Dashboard = () => {
       );
     }
 
-    if (!data?.length) {
+    if (!rawData?.length) {
       return (
         <Alert>
           <AlertDescription className="text-[#8E9196]">
@@ -98,10 +125,12 @@ const Dashboard = () => {
       );
     }
 
+    const chartData = formatFn(rawData);
+
     return (
       <div className="h-[400px]">
         <ChartContainer config={{}}>
-          <BarChart data={data}>
+          <BarChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
             <XAxis dataKey="name" stroke="#8E9196" />
             <YAxis stroke="#8E9196" />
@@ -140,7 +169,8 @@ const Dashboard = () => {
                 isSentimentLoading,
                 sentimentError,
                 "No sentiment data available yet. Start chatting to see your sentiment analysis!",
-                "#049DD3"
+                "#049DD3",
+                formatSentimentData
               )}
             </CardContent>
           </Card>
@@ -157,7 +187,8 @@ const Dashboard = () => {
                 isActivityLoading,
                 activityError,
                 "No activity data available yet. Your activities will be tracked as you use the app!",
-                "#049DD3"
+                "#049DD3",
+                formatActivityData
               )}
             </CardContent>
           </Card>
