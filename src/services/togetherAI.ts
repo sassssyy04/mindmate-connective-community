@@ -20,7 +20,7 @@ export async function generateAIResponse(userMessage: string) {
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "mistralai/Mixtral-8x7B-Instruct-v0.1",
+        model: "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo",
         messages: [
           {
             role: "system",
