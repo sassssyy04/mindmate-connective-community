@@ -6,7 +6,10 @@ let together: Together | null = null;
 export function setApiKey(key: string) {
   console.log("Setting API key in togetherAI service");
   apiKey = key;
-  together = new Together(key);
+  together = new Together({ 
+    auth: key,
+    clientOptions: {} 
+  });
 }
 
 export async function generateAIResponse(userMessage: string) {
