@@ -66,7 +66,12 @@ const Dashboard = () => {
       date: new Date(item.created_at).toLocaleDateString(),
       value: item.sentiment === 'positive' ? 1 : item.sentiment === 'neutral' ? 0 : -1,
       confidence: item.confidence_score,
-      sentiment: item.sentiment
+      sentiment: item.sentiment,
+      color: item.sentiment === 'positive' 
+        ? '#019640'
+        : item.sentiment === 'neutral'
+        ? '#77C5BE'
+        : '#6A1B9A'
     }));
   };
 
@@ -78,20 +83,6 @@ const Dashboard = () => {
       duration: item.duration_minutes,
       type: item.activity_type
     }));
-  };
-
-  const getSentimentColor = (dataPoint: any) => {
-    if (!dataPoint) return '#049DD3'; // Default tribe-blue
-    switch (dataPoint.sentiment) {
-      case 'positive':
-        return '#019640'; // tribe-green
-      case 'neutral':
-        return '#77C5BE'; // tribe-mint
-      case 'negative':
-        return '#6A1B9A'; // tribe-purple
-      default:
-        return '#049DD3'; // tribe-blue
-    }
   };
 
   const renderContent = (
@@ -167,8 +158,8 @@ const Dashboard = () => {
               name={renderProps.name}
               strokeWidth={2}
               dot={renderProps.dataKey === 'value' ? {
-                stroke: (dataPoint) => getSentimentColor(dataPoint),
-                fill: (dataPoint) => getSentimentColor(dataPoint),
+                stroke: '#FFFFFF',
+                fill: (props: any) => props.payload.color,
                 r: 4
               } : { 
                 stroke: renderProps.stroke || '#049DD3',
@@ -176,6 +167,7 @@ const Dashboard = () => {
                 r: 4
               }}
               activeDot={{ r: 6, strokeWidth: 2 }}
+              stroke={(props: any) => props.payload.color}
             />
           </LineChart>
         </ResponsiveContainer>
