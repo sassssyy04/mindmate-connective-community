@@ -65,7 +65,8 @@ const Dashboard = () => {
     return data.map(item => ({
       date: new Date(item.created_at).toLocaleDateString(),
       value: item.sentiment === 'positive' ? 1 : item.sentiment === 'neutral' ? 0 : -1,
-      confidence: item.confidence_score
+      confidence: item.confidence_score,
+      sentiment: item.sentiment
     }));
   };
 
@@ -79,6 +80,20 @@ const Dashboard = () => {
     }));
   };
 
+  const getSentimentColor = (dataPoint: any) => {
+    if (!dataPoint) return '#049DD3'; // Default tribe-blue
+    switch (dataPoint.sentiment) {
+      case 'positive':
+        return '#019640'; // tribe-green
+      case 'neutral':
+        return '#77C5BE'; // tribe-mint
+      case 'negative':
+        return '#6A1B9A'; // tribe-purple
+      default:
+        return '#049DD3'; // tribe-blue
+    }
+  };
+
   const renderContent = (
     rawData: any[], 
     isLoading: boolean, 
@@ -87,7 +102,7 @@ const Dashboard = () => {
     formatFn: (data: any[]) => any[],
     renderProps: {
       dataKey: string;
-      stroke: string;
+      stroke?: string;
       name: string;
     }
   ) => {
@@ -148,11 +163,19 @@ const Dashboard = () => {
             <Line 
               type="monotone"
               dataKey={renderProps.dataKey}
-              stroke={renderProps.stroke}
+              stroke={renderProps.stroke || '#049DD3'}
               name={renderProps.name}
               strokeWidth={2}
-              dot={{ stroke: renderProps.stroke, strokeWidth: 2, r: 4 }}
-              activeDot={{ r: 6, stroke: renderProps.stroke, strokeWidth: 2 }}
+              dot={renderProps.dataKey === 'value' ? {
+                stroke: (dataPoint) => getSentimentColor(dataPoint),
+                fill: (dataPoint) => getSentimentColor(dataPoint),
+                r: 4
+              } : { 
+                stroke: renderProps.stroke || '#049DD3',
+                strokeWidth: 2,
+                r: 4
+              }}
+              activeDot={{ r: 6, strokeWidth: 2 }}
             />
           </LineChart>
         </ResponsiveContainer>
@@ -190,7 +213,6 @@ const Dashboard = () => {
                 formatSentimentData,
                 {
                   dataKey: "value",
-                  stroke: "#049DD3",
                   name: "Sentiment"
                 }
               )}
