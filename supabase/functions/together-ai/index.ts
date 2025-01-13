@@ -1,4 +1,4 @@
-import { serve } from "https://deno.fresh.run/std@0.204.0/http/server.ts"
+import { serve } from "https://deno.land/std@0.204.0/http/server.ts"
 
 const TOGETHER_API_URL = "https://api.together.xyz/v1/chat/completions"
 
